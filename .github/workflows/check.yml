@@ -1,0 +1,26 @@
+name: Check installer
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash -n install.sh && bash -n tests/ubuntu-smoke.sh
+      - run: shellcheck install.sh tests/ubuntu-smoke.sh
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux/amd64
+          - runner: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash tests/ubuntu-smoke.sh '${{ matrix.platform }}'
+        timeout-minutes: 15
